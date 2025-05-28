@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PalmFert - Kalkulator Pupuk Sawit</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 20px;
+      background: #f2f2f2;
+      border-radius: 10px;
+    }
+    h1 {
+      text-align: center;
+      color: #2e7d32;
+    }
+    label {
+      display: block;
+      margin: 10px 0 5px;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 5px;
+    }
+    button {
+      background-color: #2e7d32;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    .hasil {
+      background: white;
+      padding: 15px;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <h1>PalmFert - Kalkulator Pupuk Sawit</h1>
+
+  <label>Usia Tanaman (tahun):</label>
+  <input type="number" id="usia" min="1" max="25" placeholder="Contoh: 5"/>
+
+  <label>Jenis Tanah:</label>
+  <select id="tanah">
+    <option value="ultisol">Ultisol</option>
+    <option value="gambut">Gambut</option>
+    <option value="mineral">Mineral</option>
+  </select>
+
+  <label>Luas Lahan (hektar):</label>
+  <input type="number" id="luas" min="1" placeholder="Contoh: 2"/>
+
+  <label>Jumlah Pohon per Hektare:</label>
+  <input type="number" id="pohonPerHa" min="1" placeholder="Contoh: 136"/>
+
+  <label>Jenis Pemupukan:</label>
+  <select id="metode">
+    <option value="kimia">Pupuk Kimia</option>
+    <option value="organik">Pupuk Organik</option>
+    <option value="kombinasi">Gabungan Organik + Kimia</option>
+  </select>
+
+  <button onclick="hitungPupuk()">Hitung Rekomendasi</button>
+
+  <div id="output" class="hasil"></div>
+
+  <script>
+    function hitungPupuk() {
+      const usia = parseInt(document.getElementById("usia").value);
+      const luas = parseFloat(document.getElementById("luas").value);
+      const pohonPerHa = parseInt(document.getElementById("pohonPerHa").value);
+      const tanah = document.getElementById("tanah").value;
+      const metode = document.getElementById("metode").value;
+      const totalPohon = pohonPerHa * luas;
+
+      if (!usia || !luas || !pohonPerHa) {
+        document.getElementById("output").innerHTML = "Mohon isi semua data dengan benar.";
+        return;
+      }
+
+      let output = `<h3>Metode: ${metode.charAt(0).toUpperCase() + metode.slice(1)}</h3>`;
+
+      if (metode === "kimia") {
+        let dosis = {
+          urea: usia * 0.2,
+          tsp: usia * 0.1,
+          kcl: usia * 0.2,
+          borat: usia * 0.02,
+          dolomit: usia * 0.3
+        };
+        if (tanah === "gambut") dosis.dolomit *= 0.5;
+
+        output += `
+          <h4>Dosis per Pohon:</h4>
+          <ul>
+            <li>Urea: ${dosis.urea.toFixed(2)} kg</li>
+            <li>TSP: ${dosis.tsp.toFixed(2)} kg</li>
+            <li>KCl: ${dosis.kcl.toFixed(2)} kg</li>
+            <li>Borat: ${(dosis.borat * 1000).toFixed(0)} g</li>
+            <li>Dolomit: ${dosis.dolomit.toFixed(2)} kg</li>
+          </ul>
+          <h4>Total untuk ${totalPohon} pohon:</h4>
+          <ul>
+            <li>Urea: ${(dosis.urea * totalPohon).toFixed(1)} kg</li>
+            <li>TSP: ${(dosis.tsp * totalPohon).toFixed(1)} kg</li>
+            <li>KCl: ${(dosis.kcl * totalPohon).toFixed(1)} kg</li>
+            <li>Borat: ${(dosis.borat * totalPohon * 1000).toFixed(1)} g</li>
+            <li>Dolomit: ${(dosis.dolomit * totalPohon).toFixed(1)} kg</li>
+          </ul>`;
+      }
+
+      else if (metode === "organik") {
+        const dosisOrganikKg = usia < 4 ? 25 : usia < 8 ? 35 : 40;
+
+        output += `
+          <h4>Dosis Pupuk Organik:</h4>
+          <ul>
+            <li>Pupuk Kandang atau Kompos: ${dosisOrganikKg} kg per pohon per tahun</li>
+            <li>Total: ${(dosisOrganikKg * totalPohon).toFixed(1)} kg (${(dosisOrganikKg * totalPohon / 1000).toFixed(2)} ton)</li>
+          </ul>`;
+      }
+
+      else if (metode === "kombinasi") {
+        let kimia = {
+          urea: usia * 0.2 * 0.5,
+          tsp: usia * 0.1 * 0.5,
+          kcl: usia * 0.2 * 0.5,
+          borat: usia * 0.02 * 0.5,
+          dolomit: usia * 0.3 * 0.5
+        };
+        if (tanah === "gambut") kimia.dolomit *= 0.5;
+        const organik = usia < 4 ? 25 : usia < 8 ? 35 : 40;
+
+        output += `
+          <h4>Dosis per Pohon:</h4>
+          <ul>
+            <li>Pupuk Organik: ${organik} kg</li>
+            <li>Urea: ${kimia.urea.toFixed(2)} kg</li>
+            <li>TSP: ${kimia.tsp.toFixed(2)} kg</li>
+            <li>KCl: ${kimia.kcl.toFixed(2)} kg</li>
+            <li>Borat: ${(kimia.borat * 1000).toFixed(0)} g</li>
+            <li>Dolomit: ${kimia.dolomit.toFixed(2)} kg</li>
+          </ul>
+          <h4>Total untuk ${totalPohon} pohon:</h4>
+          <ul>
+            <li>Pupuk Organik: ${(organik * totalPohon).toFixed(1)} kg</li>
+            <li>Urea: ${(kimia.urea * totalPohon).toFixed(1)} kg</li>
+            <li>TSP: ${(kimia.tsp * totalPohon).toFixed(1)} kg</li>
+            <li>KCl: ${(kimia.kcl * totalPohon).toFixed(1)} kg</li>
+            <li>Borat: ${(kimia.borat * totalPohon * 1000).toFixed(1)} g</li>
+            <li>Dolomit: ${(kimia.dolomit * totalPohon).toFixed(1)} kg</li>
+          </ul>`;
+      }
+
+      document.getElementById("output").innerHTML = output;
+    }
+  </script>
+</body>
+</html>
